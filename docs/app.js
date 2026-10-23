@@ -1,13 +1,10 @@
-import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.180.0/build/three.module.js';
-import { OrbitControls } from 'https://cdn.jsdelivr.net/npm/three@0.180.0/examples/jsm/controls/OrbitControls.js';
-
 const viewer = document.querySelector('#viewer');
 const form = document.querySelector('#controls');
 const status = document.querySelector('#status');
 const scene = new THREE.Scene(); scene.background = new THREE.Color(0x101318);
 const camera = new THREE.PerspectiveCamera(45, 1, 0.1, 1000); camera.position.set(95, 80, 120);
 const renderer = new THREE.WebGLRenderer({ antialias: true }); viewer.append(renderer.domElement);
-const controls = new OrbitControls(camera, renderer.domElement); controls.enableDamping = true;
+const controls = new THREE.OrbitControls(camera, renderer.domElement); controls.enableDamping = true;
 scene.add(new THREE.HemisphereLight(0xffe0c0, 0x202838, 2));
 const group = new THREE.Group(); scene.add(group); let triangles = [];
 
