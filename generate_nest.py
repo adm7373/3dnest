@@ -5,6 +5,7 @@ from pathlib import Path
 import numpy as np
 import trimesh
 import yaml
+from numpy.random import default_rng
 
 
 def load_config(config_path="config.yaml"):
@@ -94,6 +95,70 @@ def make_shell(outer_radius, inner_radius, center_z, bottom_z, top_z, resolution
     return mesh
 
 
+def make_torus_section(major_radius, tube_radius, start_angle, span, z, sections=12, tube_sections=8):
+    """Create a capped angular section of a torus around the Z axis."""
+    u = np.linspace(start_angle, start_angle + span, sections + 1)
+    v = np.linspace(0, 2 * np.pi, tube_sections, endpoint=False)
+    uu, vv = np.meshgrid(u, v, indexing="ij")
+    vertices = np.column_stack(((major_radius + tube_radius * np.cos(vv)).ravel() * np.cos(uu).ravel(),
+                                (major_radius + tube_radius * np.cos(vv)).ravel() * np.sin(uu).ravel(),
+                                (z + tube_radius * np.sin(vv)).ravel()))
+    faces = []
+    for i in range(sections):
+        for j in range(tube_sections):
+            nj = (j + 1) % tube_sections
+            a, b = i * tube_sections + j, (i + 1) * tube_sections + j
+            faces.extend([[a, b, (i + 1) * tube_sections + nj], [a, (i + 1) * tube_sections + nj, i * tube_sections + nj]])
+    # End caps.
+    for end in (0, sections):
+        base = end * tube_sections
+        center = len(vertices)
+        vertices = np.vstack((vertices, vertices[base:base + tube_sections].mean(axis=0)))
+        for j in range(tube_sections):
+            if end == 0:
+                faces.append([center, base + (j + 1) % tube_sections, base + j])
+            else:
+                faces.append([center, base + j, base + (j + 1) % tube_sections])
+    return trimesh.Trimesh(vertices=vertices, faces=np.asarray(faces), process=True)
+
+
+def make_sticks(config, outer_radius, center_z, bottom_z, top_z):
+    sticks = config.get("sticks", {})
+    rng = default_rng(sticks.get("seed", 7))
+    wall = config["nest"]["wall_thickness"]
+    result = []
+    for _ in range(sticks.get("count", 0)):
+        z = rng.uniform(bottom_z + 2, top_z - 2)
+        bowl_radius = np.sqrt(outer_radius**2 - (z - center_z) ** 2)
+        tube = rng.uniform(sticks.get("diameter_min", 1.0), sticks.get("diameter_max", 5.0)) / 2
+        # Choose a major radius independently from the bowl radius. The torus
+        # center is then shifted radially so one edge of its tube touches the
+        # bowl wall.
+        scale = rng.uniform(
+            sticks.get("torus_radius_scale_min", 0.85),
+            sticks.get("torus_radius_scale_max", 1.15),
+        )
+        major = bowl_radius * scale
+        exterior = major < bowl_radius
+        span = np.deg2rad(rng.uniform(20, 70))
+        start = rng.uniform(0, 2 * np.pi)
+        stick = make_torus_section(major, tube, start, span, z)
+        mid = start + span / 2
+        center_offset = bowl_radius - major - tube if exterior else bowl_radius - major + tube
+        center_shift = np.array([center_offset * np.cos(mid), center_offset * np.sin(mid), 0.0])
+        stick.apply_translation(center_shift)
+        tilt = np.deg2rad(rng.uniform(
+            sticks.get("horizontal_angle_min_deg", -20.0),
+            sticks.get("horizontal_angle_max_deg", 20.0),
+        ))
+        axis = np.array([-np.sin(mid), np.cos(mid), 0.0])
+        pivot = np.array([(major + center_offset) * np.cos(mid),
+                          (major + center_offset) * np.sin(mid), z])
+        stick.apply_transform(trimesh.transformations.rotation_matrix(tilt, axis, pivot))
+        result.append(stick)
+    return result
+
+
 def main():
     config = load_config()
     nest, output = config["nest"], config["output"]
@@ -104,6 +169,8 @@ def main():
         nest["center_z"], nest["bottom_z"], nest["top_z"],
         output["resolution"], output.get("vertical_resolution", output["resolution"] // 2)
     )
+    meshes = [mesh] + make_sticks(config, outer_radius, nest["center_z"], nest["bottom_z"], nest["top_z"])
+    mesh = trimesh.util.concatenate(meshes)
     output_path = Path(output["filename"])
     mesh.export(output_path)
     print(f"Exported {output_path}")
