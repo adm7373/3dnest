@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>3D Nest Generator</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <main>
+    <aside>
+      <h1>3D Nest Generator</h1>
+      <p>Adjust the parameters, rotate the preview, and download an STL generated in your browser.</p>
+      <form id="controls">
+        <label>Outer radius <input name="outer_radius" type="number" value="55" step="1"></label>
+        <label>Sphere center Z <input name="center_z" type="number" value="52.92" step="0.1"></label>
+        <label>Bottom cut Z <input name="bottom_z" type="number" value="5" step="1"></label>
+        <label>Top cut Z <input name="top_z" type="number" value="55" step="1"></label>
+        <label>Wall thickness <input name="wall_thickness" type="number" value="3" step="0.5"></label>
+        <label>Stick count <input name="count" type="number" value="150" min="0" max="1000" step="10"></label>
+        <label>Stick diameter min <input name="diameter_min" type="number" value="2.5" step="0.1"></label>
+        <label>Stick diameter max <input name="diameter_max" type="number" value="6" step="0.1"></label>
+        <label>Torus scale min <input name="scale_min" type="number" value="0.6" step="0.05"></label>
+        <label>Torus scale max <input name="scale_max" type="number" value="1.4" step="0.05"></label>
+        <label>Tilt min (degrees) <input name="tilt_min" type="number" value="-30" step="1"></label>
+        <label>Tilt max (degrees) <input name="tilt_max" type="number" value="30" step="1"></label>
+        <button type="submit">Generate</button>
+        <button id="download" type="button">Download STL</button>
+      </form>
+      <p id="status"></p>
+    </aside>
+    <section id="viewer"></section>
+  </main>
+  <script type="module" src="app.js"></script>
+</body>
+</html>
