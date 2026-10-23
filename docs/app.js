@@ -22,7 +22,7 @@ function shell(p) {
 function stick(p, rng) {
   const z=p.bottom_z+2+ rng()*(p.top_z-p.bottom_z-4), br=Math.sqrt(Math.max(1,p.outer_radius**2-(z-p.center_z)**2));
   const tube=p.diameter_min/2+rng()*(p.diameter_max-p.diameter_min)/2, major=br*(p.scale_min+rng()*(p.scale_max-p.scale_min));
-  const ext=major<br, d=ext?br-major-tube:br-major+tube, start=rng()*Math.PI*2, span=(20+rng()*50)*Math.PI/180, ns=10, nt=8, v=[], f=[];
+  const ext=major<br, overlap=p.overlap, d=ext?br+overlap-major-tube:br-overlap-major+tube, start=rng()*Math.PI*2, span=(20+rng()*50)*Math.PI/180, ns=10, nt=8, v=[], f=[];
   for(let i=0;i<=ns;i++)for(let j=0;j<nt;j++){const u=start+span*i/ns,w=2*Math.PI*j/nt;v.push(new THREE.Vector3((d+(major+tube*Math.cos(w))*Math.cos(u)),(major+tube*Math.cos(w))*Math.sin(u),z+tube*Math.sin(w)));}
   for(let i=0;i<ns;i++)for(let j=0;j<nt;j++){const a=i*nt+j,b=(i+1)*nt+j,c=(i+1)*nt+(j+1)%nt,d0=i*nt+(j+1)%nt;addQuad(v[a],v[b],v[c],v[d0],f)}
   return {vertices:v,faces:f};
