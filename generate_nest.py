@@ -122,6 +122,15 @@ def make_torus_section(major_radius, tube_radius, start_angle, span, z, sections
     return trimesh.Trimesh(vertices=vertices, faces=np.asarray(faces), process=True)
 
 
+def make_flat_disk(radius, z, thickness, resolution):
+    return trimesh.creation.cylinder(
+        radius=radius, height=thickness, sections=resolution,
+        transform=trimesh.transformations.translation_matrix(
+            [0.0, 0.0, z + thickness / 2.0]
+        ),
+    )
+
+
 def make_sticks(config, outer_radius, center_z, bottom_z, top_z):
     sticks = config.get("sticks", {})
     rng = default_rng(sticks.get("seed", 7))
@@ -169,7 +178,18 @@ def main():
         nest["center_z"], nest["bottom_z"], nest["top_z"],
         output["resolution"], output.get("vertical_resolution", output["resolution"] // 2)
     )
-    meshes = [mesh] + make_sticks(config, outer_radius, nest["center_z"], nest["bottom_z"], nest["top_z"])
+    sticks = make_sticks(config, outer_radius, nest["center_z"], nest["bottom_z"], nest["top_z"])
+    if output.get("remove_bowl_after_sticks", False):
+        # Replace the bowl with a thick base trimmed to the bowl's lower ring.
+        bottom_radius = np.sqrt(
+            outer_radius**2 - (nest["bottom_z"] - nest["center_z"]) ** 2
+        ) + output.get("bottom_disk_extra_radius", 0.0)
+        bottom = make_flat_disk(
+            bottom_radius, nest["bottom_z"], nest["wall_thickness"], output["resolution"]
+        )
+        meshes = [bottom] + sticks
+    else:
+        meshes = [mesh] + sticks
     mesh = trimesh.util.concatenate(meshes)
     output_path = Path(output["filename"])
     mesh.export(output_path)

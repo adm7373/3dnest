@@ -2,21 +2,18 @@ nest:
   outer_radius: 55.0
   center_z: 52.92
   bottom_z: 5.0
-  top_z: 55.0
+  top_z: 70
   wall_thickness: 3.0
 output:
-  filename: nest_model.stl
-  resolution: 128
+  filename: nest_model_min.stl
+  resolution: 32
+  remove_bowl_after_sticks: true
+  bottom_disk_extra_radius: 5.0
 sticks:
-  count: 500
-  curvature_max_deg: 55.0
-  curvature_min_deg: 10.0
-  diameter_max: 3.0
-  diameter_min: 0.5
-  geometry_type: cylinder
-  length_max: 30.0
-  length_min: 4.0
-  torus_radius_scale_min: 0.5
+  count: 150
+  diameter_max: 6.0
+  diameter_min: 2.5
+  torus_radius_scale_min: 0.6
   torus_radius_scale_max: 1.4
-  horizontal_angle_min_deg: -20.0
-  horizontal_angle_max_deg: 20.0
+  horizontal_angle_min_deg: -30.0
+  horizontal_angle_max_deg: 30.0
