@@ -58,6 +58,19 @@ For visual comparisons, save each preset as a separate YAML file, run the
 generator, and inspect the resulting STL from the same camera angle in your
 mesh viewer.
 
+## Browser generator
+
+The `docs/` directory contains a browser-native prototype for GitHub Pages.
+It provides parameter controls, a draggable Three.js preview, and client-side
+STL download without sending geometry to a server. The Python generator remains
+the reference implementation; the browser port currently mirrors the main
+bowl and torus-stick controls and may evolve separately.
+
+The included Pages workflow publishes `docs/` from `main`. After enabling
+GitHub Pages with **GitHub Actions** as the source, the app is available at:
+
+`https://adm7373.github.io/3dnest/`
+
 ## Example presets and renderings
 
 These previews use the same high-resolution camera, background, and lighting.
