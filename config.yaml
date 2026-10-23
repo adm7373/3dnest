@@ -1,0 +1,18 @@
+nest:
+  outer_radius: 55.0
+  center_z: 52.92
+  bottom_z: 5.0
+  top_z: 55.0
+  wall_thickness: 5.0
+output:
+  filename: nest_model.stl
+  resolution: 64
+sticks:
+  count: 50
+  curvature_max_deg: 45.0
+  curvature_min_deg: 10.0
+  diameter_max: 5.0
+  diameter_min: 1.0
+  geometry_type: cylinder
+  length_max: 50.0
+  length_min: 10.0
